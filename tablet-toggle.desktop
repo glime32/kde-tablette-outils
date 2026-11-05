@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Basculer clavier
+Comment=Active ou désactive le clavier et le pavé tactile
+Exec=tablet-toggle
+Icon=input-keyboard
+Terminal=false
+Type=Application
+Categories=Utility;
