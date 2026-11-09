@@ -1,0 +1,12 @@
+[Unit]
+Description=Faux mode tablette (clavier, pavé, touches Fn, clavier virtuel)
+After=plasma-kwin_wayland.service plasma-plasmashell.service
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=%h/.local/bin/clavier-garde
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

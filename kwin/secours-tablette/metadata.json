@@ -1,0 +1,14 @@
+{
+    "KPlugin": {
+        "Id": "secours-tablette",
+        "Name": "Geste du bas (menu)",
+        "Description": "Glisser le doigt depuis le bas de l'écran ouvre le menu des applications, comme la touche Windows ; sort aussi du plein écran. Actif seulement quand la barre n'est pas visible.",
+        "Authors": [{ "Name": "glime32" }],
+        "License": "MIT",
+        "Version": "2.0",
+        "EnabledByDefault": true
+    },
+    "X-Plasma-API": "javascript",
+    "X-Plasma-MainScript": "code/main.js",
+    "KPackageStructure": "KWin/Script"
+}

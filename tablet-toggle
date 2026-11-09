@@ -1,26 +1,14 @@
-#!/bin/bash
-# tablet-toggle : coupe / rallume le clavier et le pavé tactile intégrés.
-#
-# Sur mon Yoga 7 le mode tablette de KDE ne se déclenche jamais quand on plie
-# l'écran (le capteur ISH n'a pas de firmware pour ce modèle), donc je le fais
-# à la main avec ce bouton. Ça passe par KWin, pas besoin de root.
-#
-#   tablet-toggle       bascule
-#   tablet-toggle on    force le retour du clavier (si l'état s'est perdu)
-#
-# Les noms viennent de `busctl --user tree org.kde.KWin` + la propriété name.
-# Pour un autre PC, mets les tiens dans TABLET_TOGGLE_DEVICES (séparés par |).
-IFS='|' read -r -a NAMES <<< "${TABLET_TOGGLE_DEVICES:-AT Translated Set 2 keyboard|ELAN06FA:00 04F3:327E Touchpad|ELAN06FA:00 04F3:327E Mouse}"
-STATE="$XDG_RUNTIME_DIR/tablet-toggle.state"
-
-if [ -f "$STATE" ] || [ "$1" = on ]; then NEW=true; else NEW=false; fi
-
-for path in $(busctl --user tree org.kde.KWin --list | grep '^/org/kde/KWin/InputDevice/event'); do
-  name=$(busctl --user get-property org.kde.KWin "$path" org.kde.KWin.InputDevice name | sed 's/^s "\(.*\)"$/\1/')
-  for n in "${NAMES[@]}"; do
-    [ "$name" = "$n" ] && busctl --user set-property org.kde.KWin "$path" org.kde.KWin.InputDevice enabled b $NEW
-  done
-done
-
-# le fichier d'état est dans /run/user, il disparaît au redémarrage (et le clavier revient)
-if [ "$NEW" = true ]; then rm -f "$STATE"; else touch "$STATE"; fi
+#!/bin/sh
+# tablet-toggle [toggle|on|off|status] — bouton « Basculer Clavier ».
+# Un seul appel D-Bus au démon clavier-garde (déjà en veille) ; s'il ne tourne
+# pas, clavier-garde fait le travail lui-même.
+cmd=${1:-toggle}
+case "$cmd" in
+    toggle) set -- Basculer;          py=basculer ;;
+    on)     set -- Tablette b false;  py=on ;;
+    off)    set -- Tablette b true;   py=off ;;
+    status) set -- Etat;              py=etat ;;
+    *) echo "usage : tablet-toggle [toggle|on|off|status]"; exit 2 ;;
+esac
+busctl --user call org.glime.Tablette /org/glime/Tablette org.glime.Tablette "$@" 2>/dev/null \
+    || exec "$HOME/.local/bin/clavier-garde" "$py"
